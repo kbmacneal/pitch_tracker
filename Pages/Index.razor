@@ -1,0 +1,41 @@
+﻿@page "/"
+
+<label class="h3">The pitcher is on pace for</label>
+<br />
+<label class="h4">@on_pace_for.ToString()</label>
+<br />
+<label class="h3">per inning</label>
+
+<form id="frm_main">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pitches</th>
+                <th>Innings</th>
+                <th>Thirds</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" id="tb_pitches" @bind="pitches" /></td>
+                <td><input type="text" id="tb_innings" @bind="innings" /></td>
+                <td><input type="text" id="tb_thirds" @bind="thirds" /></td>
+            </tr>
+        </tbody>
+    </table>
+    <input type="button" form="frm_main" @onclick="calc" class="btn btn-primary" value="Calc" />
+</form>
+
+@code {
+
+    private async Task calc()
+    {
+        on_pace_for = pitches / (innings + thirds / 3M);
+    }
+
+    private decimal pitches { get; set; }
+    private decimal innings { get; set; }
+    private decimal thirds { get; set; }
+
+    private decimal on_pace_for { get; set; } = 0;
+}
