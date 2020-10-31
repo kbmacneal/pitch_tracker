@@ -1,6 +1,9 @@
 ﻿@page "/"
+@using Flurl.Util
+@using Flurl.Http
+@using player_tracker.Classes
 
-<label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for,2) pitches per inning. Assuming a target of 100 pitches total thrown, the pitcher will last @Decimal.Round(pulled_innings,2) innings.</label>
+<label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of 100 pitches total thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) innings.</label>
 
 <form id="frm_main">
     <table class="table">
@@ -21,13 +24,72 @@
     </table>
     <input type="button" form="frm_main" @onclick="calc" class="btn btn-primary" value="Calc" />
 </form>
+<hr />
+<input type="button" @onclick="fetch" class="btn btn-primary" value="Load Pitchers" style="display:@disp" />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            Name
+        </div>
+        <div class="col-md-4">
+            Throws
+        </div>
+        <div class="col-md-4">
+            Used
+        </div>
+    </div>
+    <div class="row">
+        @foreach (var item in pitchers)
+        {
+            <div class="col-md-4">
+                @item.Name
+            </div>
+            <div class="col-md-4">
+                @item.Throws
+            </div>
+            <div class="col-md-4">
+                <input type="checkbox" />
+            </div>
+        }
+        <div class="flex-column">
+        </div>
+    </div>
+</div>
 
 @code {
+
+    private async Task fetch()
+    {
+        using (var client = new HttpClient())
+        {
+            var result = await client.GetStringAsync("https://lookup-service-prod.mlb.com/json/named.roster_40.bam?team_id=%27119%27");
+
+            Dictionary<string, string>[] players = DodgerPlayer.FromJson(result).Roster40.QueryResults.Row;
+
+            foreach (var kvp in players)
+            {
+                foreach (var sub_kvp in kvp)
+                {
+                    if (sub_kvp.Key == "primary_position" && sub_kvp.Value == "1")
+                    {
+                        pitchers.Add(new PitcherModel()
+                        {
+                            Name = kvp["name_display_first_last"],
+                            Throws = kvp["throws"]
+                        });
+                    }
+                }
+            }
+        }
+
+        disp = "none";
+    }
 
     private async Task calc()
     {
         on_pace_for = pitches / (innings + thirds / 3M);
-        pulled_innings = 100M/on_pace_for;
+        pulled_innings = 100M / on_pace_for;
 
     }
 
@@ -36,5 +98,9 @@
     private decimal thirds { get; set; }
 
     private decimal on_pace_for { get; set; } = 0;
-    private decimal pulled_innings{get;set;}=0;
+    private decimal pulled_innings { get; set; } = 0;
+
+    private List<PitcherModel> pitchers { get; set; } = new List<PitcherModel>();
+
+    private string disp { get; set; } = "inline";
 }

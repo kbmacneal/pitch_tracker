@@ -17,5 +17,19 @@ namespace pitch_tracker
 
             await builder.Build().RunAsync();
         }
+
+        //class BlazorHttpClientFactory : DefaultHttpClientFactory
+        //{
+        //    public override HttpClient CreateHttpClient(HttpMessageHandler handler)
+        //    {
+        //        return new HttpClient();
+        //    }
+
+        //    public override HttpMessageHandler CreateMessageHandler()
+        //    {
+        //        return null;
+        //    }
+
+        //}
     }
 }
