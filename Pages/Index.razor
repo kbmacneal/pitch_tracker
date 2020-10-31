@@ -3,7 +3,7 @@
 @using Flurl.Http
 @using player_tracker.Classes
 
-<label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of 100 pitches total thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) innings.</label>
+<label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of @target_pitches total pitches thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) more innings.</label>
 
 <form id="frm_main">
     <table class="table">
@@ -12,6 +12,7 @@
                 <th>Pitches</th>
                 <th>Innings</th>
                 <th>Thirds</th>
+                <th>Target Pitches</th>
             </tr>
         </thead>
         <tbody>
@@ -19,6 +20,7 @@
                 <td><input type="text" id="tb_pitches" @bind="pitches" /></td>
                 <td><input type="text" id="tb_innings" @bind="innings" /></td>
                 <td><input type="text" id="tb_thirds" @bind="thirds" /></td>
+                <td><input type="text" id="tb_target" @bind="target_pitches" /></td>
             </tr>
         </tbody>
     </table>
@@ -89,13 +91,14 @@
     private async Task calc()
     {
         on_pace_for = pitches / (innings + thirds / 3M);
-        pulled_innings = 100M / on_pace_for;
+        pulled_innings = ((decimal)target_pitches / on_pace_for) - (innings + thirds / 3M);
 
     }
 
     private decimal pitches { get; set; }
     private decimal innings { get; set; }
     private decimal thirds { get; set; }
+    private int target_pitches { get; set; } = 100;
 
     private decimal on_pace_for { get; set; } = 0;
     private decimal pulled_innings { get; set; } = 0;
