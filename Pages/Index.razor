@@ -1,10 +1,6 @@
 ﻿@page "/"
 
-<label class="h3">The pitcher is on pace for</label>
-<br />
-<label class="h4">@on_pace_for.ToString()</label>
-<br />
-<label class="h3">per inning</label>
+<label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for,2) pitches per inning. Assuming a target of 100 pitches total thrown, the pitcher will last @Decimal.Round(pulled_innings,2) innings.</label>
 
 <form id="frm_main">
     <table class="table">
@@ -31,6 +27,8 @@
     private async Task calc()
     {
         on_pace_for = pitches / (innings + thirds / 3M);
+        pulled_innings = 100M/on_pace_for;
+
     }
 
     private decimal pitches { get; set; }
@@ -38,4 +36,5 @@
     private decimal thirds { get; set; }
 
     private decimal on_pace_for { get; set; } = 0;
+    private decimal pulled_innings{get;set;}=0;
 }
