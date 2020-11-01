@@ -1,6 +1,4 @@
 ﻿@page "/"
-@using Flurl.Util
-@using Flurl.Http
 @using player_tracker.Classes
 
 <label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of @target_pitches total pitches thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) more innings.</label>
