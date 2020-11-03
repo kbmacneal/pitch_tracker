@@ -20,6 +20,10 @@ app {
     flex-direction: column;
 }
 
+.border-bottom-1{
+    border-bottom:2px solid black;
+}
+
 .top-row {
     height: 3.5rem;
     display: flex;
