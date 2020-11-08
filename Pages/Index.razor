@@ -2,6 +2,10 @@
 @using player_tracker.Classes
 
 <label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of @target_pitches total pitches thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) more innings.</label>
+<br />
+<div class="alert alert-danger" role="alert" style="display:@error_display;">
+    @error_message
+</div>
 
 <form id="frm_main">
     <table class="table">
@@ -88,9 +92,27 @@
 
     private async Task calc()
     {
-        on_pace_for = pitches / (innings + thirds / 3M);
-        pulled_innings = ((decimal)target_pitches / on_pace_for) - (innings + thirds / 3M);
+        if ((innings + thirds / 3M) == 0M)
+        {
+            error_message = "Cannot divide by zero.";
+            error_display = "block";
+            return;
+        }
+        else
+        {
+            error_display = "none";
+        }
 
+        on_pace_for = pitches / (innings + thirds / 3M);
+
+        if (on_pace_for == 0)
+        {
+            on_pace_for = 0;
+            pulled_innings = 0;
+            return;
+        }
+
+        pulled_innings = ((decimal)target_pitches / on_pace_for) - (innings + thirds / 3M);
     }
 
     private decimal pitches { get; set; }
@@ -104,4 +126,8 @@
     private List<PitcherModel> pitchers { get; set; } = new List<PitcherModel>();
 
     private string disp { get; set; } = "inline";
+
+    private string error_message { get; set; } = "";
+
+    private string error_display { get; set; } = "none";
 }
