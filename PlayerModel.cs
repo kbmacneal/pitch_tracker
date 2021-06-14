@@ -17,7 +17,6 @@ namespace player_tracker.Classes
     public class PitcherModel
     {
         public string Name { get; set; }
-        public string Throws { get; set; }
     }
 
     public partial class Roster40

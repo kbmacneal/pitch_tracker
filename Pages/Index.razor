@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using player_tracker.Classes
+@using BaseballSharp
 
 <label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of @target_pitches total pitches thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) more innings.</label>
 <br />
@@ -33,26 +34,39 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-4 border-bottom-1">
+        <div class="col-md-6 border-bottom-1">
             Name
         </div>
-        <div class="col-md-4 border-bottom-1">
-            Throws
-        </div>
-        <div class="col-md-4 border-bottom-1">
+        <div class="col-md-6 border-bottom-1">
             Used
         </div>
     </div>
     <div class="row">
-        @foreach (var item in pitchers)
+        <h3>Relievers</h3>
+    </div>
+    <div class="row">
+        @foreach (var item in relievers)
         {
-            <div class="col-md-4">
+            <div class="col-md-6">
                 @item.Name
             </div>
-            <div class="col-md-4">
-                @item.Throws
+            <div class="col-md-6">
+                <input type="checkbox" />
             </div>
-            <div class="col-md-4">
+        }
+        <div class="flex-column">
+        </div>
+    </div>
+    <div class="row">
+        <h3>Starters</h3>
+    </div>
+    <div class="row">
+        @foreach (var item in starters)
+        {
+            <div class="col-md-6">
+                @item.Name
+            </div>
+            <div class="col-md-6">
                 <input type="checkbox" />
             </div>
         }
@@ -65,26 +79,25 @@
 
     private async Task fetch()
     {
-        using (var client = new HttpClient())
+
+        var rel = await BaseballSharp.Api.DepthChart((int)BaseballSharp.eTeamId.Dodgers);
+
+        foreach (var player in rel.Where(e => e.PositionCode == "1"))
         {
-            var result = await client.GetStringAsync("https://lookup-service-prod.mlb.com/json/named.roster_40.bam?team_id=%27119%27");
-
-            Dictionary<string, string>[] players = DodgerPlayer.FromJson(result).Roster40.QueryResults.Row;
-
-            foreach (var kvp in players)
+            relievers.Add(new PitcherModel()
             {
-                foreach (var sub_kvp in kvp)
-                {
-                    if (sub_kvp.Key == "primary_position" && sub_kvp.Value == "1")
-                    {
-                        pitchers.Add(new PitcherModel()
-                        {
-                            Name = kvp["name_display_first_last"],
-                            Throws = kvp["throws"]
-                        });
-                    }
-                }
-            }
+                Name = player.PlayerFullName
+            });
+        }
+
+        var star = await BaseballSharp.Api.TeamRoster((int)BaseballSharp.eTeamId.Dodgers, 2021);
+
+        foreach (var player in star.Where(e => e.PositionCode == "1" && e.StatusCode == "A").Where(e => !relievers.Select(e => e.Name).Contains(e.PlayerFullName)))
+        {
+            starters.Add(new PitcherModel()
+            {
+                Name = player.PlayerFullName
+            });
         }
 
         disp = "none";
@@ -123,7 +136,9 @@
     private decimal on_pace_for { get; set; } = 0;
     private decimal pulled_innings { get; set; } = 0;
 
-    private List<PitcherModel> pitchers { get; set; } = new List<PitcherModel>();
+    private List<PitcherModel> relievers { get; set; } = new List<PitcherModel>();
+
+    private List<PitcherModel> starters { get; set; } = new List<PitcherModel>();
 
     private string disp { get; set; } = "inline";
 
