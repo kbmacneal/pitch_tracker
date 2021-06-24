@@ -2,6 +2,13 @@
 @using player_tracker.Classes
 @using BaseballSharp
 
+<style>
+    input[type=checkbox]:checked + label {
+        color: red;
+        text-decoration: line-through;
+    }
+</style>
+
 <label class="h3">The pitcher is on pace for @Decimal.Round(on_pace_for, 2) pitches per inning. Assuming a target of @target_pitches total pitches thrown, the pitcher will last @Decimal.Round(pulled_innings, 2) more innings.</label>
 <br />
 <div class="alert alert-danger" role="alert" style="display:@error_display;">
@@ -34,11 +41,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-6 border-bottom-1">
-            Name
-        </div>
-        <div class="col-md-6 border-bottom-1">
-            Used
+        <div class="col-md-6">
         </div>
     </div>
     <div class="row">
@@ -48,14 +51,10 @@
         @foreach (var item in relievers)
         {
             <div class="col-md-6">
-                @item.Name
+                <input type="checkbox" id="@item.Name"> <label for="@item.Name">@item.Name</label>
             </div>
-            <div class="col-md-6">
-                <input type="checkbox" />
-            </div>
+
         }
-        <div class="flex-column">
-        </div>
     </div>
     <div class="row">
         <h3>Starters</h3>
@@ -64,14 +63,9 @@
         @foreach (var item in starters)
         {
             <div class="col-md-6">
-                @item.Name
-            </div>
-            <div class="col-md-6">
-                <input type="checkbox" />
+                <input type="checkbox" id="@item.Name"> <label for="@item.Name">@item.Name</label>
             </div>
         }
-        <div class="flex-column">
-        </div>
     </div>
 </div>
 
@@ -90,7 +84,7 @@
             });
         }
 
-        var star = await BaseballSharp.Api.TeamRoster((int)BaseballSharp.eTeamId.Dodgers, 2021);
+        var star = await BaseballSharp.Api.TeamRoster((int)BaseballSharp.eTeamId.Dodgers, 2021, DateTime.Now, rosterType.roster25);
 
         foreach (var player in star.Where(e => e.PositionCode == "1" && e.StatusCode == "A").Where(e => !relievers.Select(e => e.Name).Contains(e.PlayerFullName)))
         {
