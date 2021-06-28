@@ -76,7 +76,7 @@
 
         var rel = await BaseballSharp.Api.DepthChart((int)BaseballSharp.eTeamId.Dodgers);
 
-        foreach (var player in rel.Where(e => e.PositionCode == "1"))
+        foreach (var player in rel.Where(e => e.PositionName == "Closer" || e.PositionName == "Pitcher"))
         {
             relievers.Add(new PitcherModel()
             {
@@ -84,9 +84,9 @@
             });
         }
 
-        var star = await BaseballSharp.Api.TeamRoster((int)BaseballSharp.eTeamId.Dodgers, 2021, DateTime.Now, rosterType.roster25);
+        var star = await BaseballSharp.Api.DepthChart((int)BaseballSharp.eTeamId.Dodgers);
 
-        foreach (var player in star.Where(e => e.PositionCode == "1" && e.StatusCode == "A").Where(e => !relievers.Select(e => e.Name).Contains(e.PlayerFullName)))
+        foreach (var player in rel.Where(e => e.PositionName == "Starting Pitcher"))
         {
             starters.Add(new PitcherModel()
             {
@@ -95,6 +95,23 @@
         }
 
         disp = "none";
+    }
+
+    private async Task getGame()
+    {
+        var games = await BaseballSharp.Api.Schedule(DateTime.Now);
+
+        BaseballSharp.Models.Linescore linescore = null;
+
+        foreach (var game in games)
+        {
+            if(game.HomeTeam.Contains("Dodgers") || game.AwayTeam.Contains("Dodgers"))
+            {
+                @*linescore = BaseballSharp.Api.LineScore(game.id)*@
+            }
+        }
+
+
     }
 
     private async Task calc()
